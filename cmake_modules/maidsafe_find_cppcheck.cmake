@@ -39,12 +39,14 @@
 #    CPPCHECK_ROOT_DIR                                                         #
 #                                                                              #
 #  Variables set and cached by this module are:                                #
-#    Cppcheck_EXECUTABLE                                                       #
+#    Cppcheck_EXECUTABLE and Cppcheck_SUPPRESSIONS                             #
 #                                                                              #
 #==============================================================================#
 
 
 UNSET(Cppcheck_EXECUTABLE CACHE)
+UNSET(Cppcheck_SUPPRESSIONS CACHE)
+UNSET(CPPCHECK_SUPPRESSIONS_IN CACHE)
 
 IF(CPPCHECK_ROOT_DIR)
   SET(CPPCHECK_ROOT_DIR ${CPPCHECK_ROOT_DIR} CACHE PATH "Path to Cppcheck directory" FORCE)
@@ -71,3 +73,10 @@ IF(NOT Cppcheck_EXECUTABLE)
 ELSE()
   MESSAGE("-- Found Cppcheck - static code analysis enabled.")
 ENDIF()
+
+FILE(REMOVE ${CMAKE_BINARY_DIR}/CppCheck.supp)
+FIND_FILE(CPPCHECK_SUPPRESSIONS_IN NAMES CppCheck.supp.irn PATHS ${CMAKE_SOURCE_DIR} NO_DEFAULT_PATH)
+IF(CPPCHECK_SUPPRESSIONS_IN)
+  CONFIGURE_FILE(${CPPCHECK_SUPPRESSIONS_IN} ${CMAKE_BINARY_DIR}/CppCheck.supp)
+ENDIF()
+FIND_FILE(Cppcheck_SUPPRESSIONS NAMES CppCheck.supp PATHS ${CMAKE_BINARY_DIR} DOC "Path to configured Cppcheck suppressions file" NO_DEFAULT_PATH)
