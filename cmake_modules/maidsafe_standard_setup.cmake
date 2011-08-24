@@ -105,8 +105,9 @@ ADD_COVERAGE_EXCLUDE(\\\\.pb\\\\.)
 ADD_COVERAGE_EXCLUDE(tests/)
 ADD_COVERAGE_EXCLUDE(main\\\\.cc)
 
-# Avoid running MemCheck on STYLE_CHECK tests
+# Avoid running MemCheck on STYLE_CHECK and CPPCHECK tests
 ADD_MEMCHECK_IGNORE(STYLE_CHECK)
+ADD_MEMCHECK_IGNORE(CPPCHECK)
 
 INCLUDE(maidsafe_run_protoc)
 
@@ -128,6 +129,11 @@ IF(PYTHONINTERP_FOUND)
 ELSE()
   MESSAGE("-- Didn't find python executable: style checking disabled.")
 ENDIF()
+
+###################################################################################################
+# Cppcheck search                                                                                 #
+###################################################################################################
+INCLUDE(maidsafe_find_cppcheck)
 
 ###################################################################################################
 # All other libraries search                                                                      #
