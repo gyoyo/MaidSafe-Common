@@ -208,7 +208,11 @@ IF(PYTHONINTERP_FOUND)
 ENDIF()
 
 IF(Cppcheck_EXECUTABLE)
-  ADD_TEST(CPPCHECK ${Cppcheck_EXECUTABLE} --enable=all --error-exitcode=-1 -f -q -I${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/src)
+  IF(Cppcheck_SUPPRESSIONS)
+    ADD_TEST(CPPCHECK ${Cppcheck_EXECUTABLE} --enable=all --error-exitcode=-1 -f -q -I${PROJECT_SOURCE_DIR}/src --suppressions ${Cppcheck_SUPPRESSIONS} ${PROJECT_SOURCE_DIR}/src)
+  ELSE()
+    ADD_TEST(CPPCHECK ${Cppcheck_EXECUTABLE} --enable=all --error-exitcode=-1 -f -q -I${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/src)
+  ENDIF()
   SET_PROPERTY(TEST CPPCHECK PROPERTY LABELS Functional StaticCodeAnalysis)
 ENDIF()
 
