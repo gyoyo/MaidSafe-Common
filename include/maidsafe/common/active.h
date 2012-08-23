@@ -29,9 +29,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAIDSAFE_COMMON_ACTIVE_H_
 
 #include <atomic>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
 #include <functional>
+#include <memory>
 #include <queue>
 
 #include "boost/thread/thread.hpp"
@@ -44,15 +45,17 @@ class Active {
   typedef std::function<void()> Functor;
   Active();
   ~Active();
-  void Send(Functor functor);
+  void Stop();
+  bool Send(Functor functor);
 
  private:
   Active(const Active&);
   Active& operator=(const Active&);
   void Run();
-  bool done_;
+  bool stopping_;
   std::queue<Functor> functors_;
-  std::mutex mutex_;
+  std::shared_ptr<std::mutex> mutex_;
+  std::weak_ptr<std::mutex> weak_ptr_to_mutex_;
   std::condition_variable condition_;
   boost::thread thread_;
 };

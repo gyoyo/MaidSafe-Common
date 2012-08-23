@@ -120,18 +120,35 @@ class Logging {
     static Logging logging;
     return logging;
   }
-  void Send(functor function);
-  void SetFilter(FilterMap filter) { filter_ = filter; }
-  void AddFilter(std::string project, int level) { filter_[project] = level; }
+  void Stop();
+  bool Send(functor function);
+  void SetFilter(FilterMap filter) {
+    if (!background_)
+      background_.reset(new Active);
+    filter_ = filter;
+  }
+  void AddFilter(std::string project, int level) {
+    if (!background_)
+      background_.reset(new Active);
+    filter_[project] = level;
+  }
   FilterMap Filter() const { return filter_; }
-  void SetAsync(bool async) { async_ = async; }
+  void SetAsync(bool async) {
+    if (!background_)
+      background_.reset(new Active);
+    async_ = async;
+  }
   bool Async() const { return async_; }
-  void SetColour(ColourMode colour_mode) { colour_mode_ = colour_mode; }
+  void SetColour(ColourMode colour_mode) {
+    if (!background_)
+      background_.reset(new Active);
+    colour_mode_ = colour_mode;
+  }
   ColourMode Colour() const { return colour_mode_; }
 
  private:
   Logging();
-  maidsafe::Active background_;
+  std::unique_ptr<maidsafe::Active> background_;
   FilterMap filter_;
   bool async_;
   ColourMode colour_mode_;

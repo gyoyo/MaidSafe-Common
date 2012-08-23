@@ -30,32 +30,51 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maidsafe {
 
-Active::Active() : done_(false),
+Active::Active() : stopping_(false),
                    functors_(),
-                   mutex_(),
+                   mutex_(new std::mutex),
+                   weak_ptr_to_mutex_(mutex_),
                    condition_(),
                    thread_([=] { Run(); }) {}
 
 Active::~Active() {
-  Send([&] { done_ = true; });  // NOLINT (Fraser)
-  thread_.join();
+  Stop();
 }
 
-void Active::Send(Functor functor) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  functors_.push(functor);
-  condition_.notify_one();
+void Active::Stop() {
+  if (std::shared_ptr<std::mutex> mutex = weak_ptr_to_mutex_.lock()) {
+    std::unique_lock<std::mutex> lock(*mutex);
+    stopping_ = true;
+    condition_.notify_one();
+    condition_.wait_for(lock, std::chrono::seconds(10), [this] { return functors_.empty(); });
+    thread_.join();
+  }
+}
+
+bool Active::Send(Functor functor) {
+  if (std::shared_ptr<std::mutex> mutex = weak_ptr_to_mutex_.lock()) {
+    std::unique_lock<std::mutex> lock(*mutex);
+    if (stopping_)
+      return false;
+    functors_.push(functor);
+    condition_.notify_one();
+    return true;
+  } else {
+    return false;
+  }
 }
 
 void Active::Run() {
-  while (!done_) {
+  bool stop(false);
+  while (!stop) {
     Functor functor;
     {
-      std::unique_lock<std::mutex> lock(mutex_);
-      while (functors_.empty())
-        condition_.wait(lock);
+      std::unique_lock<std::mutex> lock(*mutex_);
+      condition_.wait(lock, [this] { return !functors_.empty(); });  // NOLINT (Fraser)
       functor = functors_.front();
       functors_.pop();
+      stop = functors_.empty() && stopping_;
+      condition_.notify_one();
     }
     functor();
   }

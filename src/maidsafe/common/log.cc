@@ -221,7 +221,8 @@ LogMessage::~LogMessage() {
   });
 
   if (Logging::instance().Async()) {
-    Logging::instance().Send(print_functor);
+    if (!Logging::instance().Send(print_functor))
+      ColouredPrint(Colour::kCyan, "*** After stop *** " + coloured_log_entry + plain_log_entry);
   } else {
     print_functor();
   }
@@ -233,20 +234,25 @@ GtestLogMessage::~GtestLogMessage() {
   if (Logging::instance().Async()) {
     std::string log_entry(stream_.str());
     Colour colour(kColour_);
-    Logging::instance().Send([colour, log_entry] { ColouredPrint(colour, log_entry); });  // NOLINT (Fraser)
+    if (!Logging::instance().Send([colour, log_entry] { ColouredPrint(colour, log_entry); }))
+      ColouredPrint(colour, log_entry);
   } else {
     ColouredPrint(kColour_, stream_.str());
   }
 }
 
 Logging::Logging()
-    : background_(),
+    : background_(new Active),
       filter_(),
       async_(true),
       colour_mode_(ColourMode::kPartialLine) {}
 
-void Logging::Send(functor voidfunction) {
-  background_.Send(voidfunction);
+void Logging::Stop() {
+  background_.reset();
+}
+
+bool Logging::Send(functor voidfunction) {
+  return background_ ? background_->Send(voidfunction) : false;
 }
 
 
