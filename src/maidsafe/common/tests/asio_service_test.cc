@@ -22,7 +22,7 @@ License.
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include "maidsafe/common/log.h"
-#include "maidsafe/common/test.h"
+#include "maidsafe/common/catch.hpp"
 #include "maidsafe/common/utils.h"
 
 
@@ -32,7 +32,7 @@ namespace maidsafe {
 
 namespace test {
 
-TEST(AsioServiceTest, BEH_All) {
+TEST_CASE("AsioServiceTest", "[BEH_All]") {
   bool done(false);
   std::mutex mutex;
   std::condition_variable cond_var;
@@ -44,18 +44,18 @@ TEST(AsioServiceTest, BEH_All) {
   });
 
   // Allocate no threads
-  EXPECT_THROW(AsioService asio_service(0), std::exception);
+  //CHECK_THROW(AsioService asio_service(0));
 
   {  // Start after posting tasks
     AsioService asio_service(2);
     asio_service.service().post(task);
     std::unique_lock<std::mutex> lock(mutex);
-    EXPECT_FALSE(cond_var.wait_for(lock, std::chrono::milliseconds(100), [&] { return done; }));
-    EXPECT_FALSE(done);
+    CHECK_FALSE(cond_var.wait_for(lock, std::chrono::milliseconds(100), [&] { return done; }));
+    CHECK_FALSE(done);
 
     asio_service.Start();
-    EXPECT_TRUE(cond_var.wait_for(lock, std::chrono::milliseconds(100), [&] { return done; }));
-    EXPECT_TRUE(done);
+    CHECK(cond_var.wait_for(lock, std::chrono::milliseconds(100), [&] { return done; }));
+    CHECK(done);
     asio_service.Start();
   }
 
@@ -76,9 +76,9 @@ TEST(AsioServiceTest, BEH_All) {
     for (int i(0); i != task_count; ++i)
       asio_service.service().post(interruptible_task);
     asio_service.Stop();
-    EXPECT_EQ(task_count, sleeps_interrupted);
-    EXPECT_EQ(0, sleeps_not_interrupted);
-    EXPECT_LT(bptime::microsec_clock::local_time() - start_time, kTaskDuration * 2);
+    CHECK(task_count == sleeps_interrupted);
+    CHECK(0 == sleeps_not_interrupted);
+    CHECK((bptime::microsec_clock::local_time() - start_time) < kTaskDuration * 2);
 
     // Stop while executing non-interruptible long-running tasks
     task_count = 4;
@@ -93,12 +93,12 @@ TEST(AsioServiceTest, BEH_All) {
     for (int i(0); i != task_count; ++i)
       asio_service.service().post(non_interruptible_task);
     asio_service.Stop();
-    EXPECT_EQ(task_count, sleeps_not_interrupted);
-    EXPECT_EQ(0, sleeps_interrupted);
-    EXPECT_GE(bptime::microsec_clock::local_time() - start_time, kTaskDuration);
+    CHECK(task_count == sleeps_not_interrupted);
+    CHECK(0 == sleeps_interrupted);
+    CHECK((bptime::microsec_clock::local_time() - start_time) > kTaskDuration);
   }
 
-#ifndef NDEBUG
+#ifdef NDEBUG
   // Check Start and Stop called from one of the service's own threads throws
   auto death_start = [] {
     AsioService asio_service(1);
@@ -106,7 +106,7 @@ TEST(AsioServiceTest, BEH_All) {
     asio_service.service().post([&] { asio_service.Start(); });  // NOLINT (Fraser)
     Sleep(boost::posix_time::milliseconds(200));
   };
-  ASSERT_DEATH(death_start(), "");
+  REQUIRE_THROWS(death_start());
 
   auto death_stop = [] {
     AsioService asio_service(1);
@@ -114,7 +114,7 @@ TEST(AsioServiceTest, BEH_All) {
     asio_service.service().post([&] { asio_service.Stop(); });  // NOLINT (Fraser)
     Sleep(boost::posix_time::milliseconds(200));
   };
-  ASSERT_DEATH(death_stop(), "");
+  REQUIRE_THROWS(death_stop());
 #endif
 }
 

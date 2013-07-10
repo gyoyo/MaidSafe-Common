@@ -13,8 +13,10 @@ implied. See the License for the specific language governing permissions and lim
 License.
 */
 
-#include "maidsafe/common/test.h"
+//#include "maidsafe/common/test.h"
 
-int main(int argc, char **argv) {
-  return maidsafe::test::ExecuteMain(argc, argv);
-}
+//int main(int argc, char **argv) {
+//  return maidsafe::test::ExecuteMain(argc, argv);
+//}
+#define CATCH_CONFIG_MAIN
+#include "maidsafe/common/catch.hpp"
