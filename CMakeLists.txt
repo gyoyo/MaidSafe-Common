@@ -123,7 +123,7 @@ if(MaidsafeTesting)
   set_property(TEST CryptoppTest.BEH_RSA_PKCS1_1_5 PROPERTY LABELS Common Behavioural CryptoPP ${CMAKE_BUILD_TYPE})
   set_property(TEST CryptoppTest.BEH_RSA_PKCS1_1_5 PROPERTY TIMEOUT 60)
 
-  label_as_critical_tests(AsioServiceTest.BEH_All
+  label_as_critical_tests(#AsioServiceTest.BEH_All
                           UtilsTest.BEH_VersionToString
                           UtilsTest.BEH_VersionToInt
                           UtilsTest.BEH_Cpu_Size
@@ -142,16 +142,16 @@ if(MaidsafeTesting)
                           RSATest.BEH_AsymEncryptDecrypt
                           RSATest.FUNC_SignValidate
                           RSATest.BEH_RsaKeysComparing
-                          BoundedStringTest.BEH_DefaultConstructor
-                          BoundedStringTest.BEH_Getters
-                          BoundedStringTest.BEH_StringConstructor
-                          BoundedStringTest.BEH_Swap
-                          BoundedStringTest.BEH_Copy
-                          BoundedStringTest.BEH_Move
-                          BoundedStringTest.BEH_Assignment
-                          BoundedStringTest.BEH_OtherBoundedStringConstructor
-                          BoundedStringTest.BEH_OtherBoundedStringAssignment
-                          BoundedStringTest.BEH_ConcatenationOperators
+                          #BoundedStringTest.BEH_DefaultConstructor
+                          #BoundedStringTest.BEH_Getters
+                          #BoundedStringTest.BEH_StringConstructor
+                          #BoundedStringTest.BEH_Swap
+                          #BoundedStringTest.BEH_Copy
+                          #BoundedStringTest.BEH_Move
+                          #BoundedStringTest.BEH_Assignment
+                          #BoundedStringTest.BEH_OtherBoundedStringConstructor
+                          #BoundedStringTest.BEH_OtherBoundedStringAssignment
+                          #BoundedStringTest.BEH_ConcatenationOperators
                           NodeIdTest.BEH_DefaultConstructor
                           NodeIdTest.BEH_DistanceCheck
                           NodeIdTest.BEH_BitToByteCount

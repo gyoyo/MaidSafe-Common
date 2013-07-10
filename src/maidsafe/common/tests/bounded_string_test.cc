@@ -173,7 +173,7 @@ TEST_CASE("BoundedString OtherBoundedStringAssignment", "[BEH]") {
   CHECK(!f.IsInitialised());
 }
 
-TEST_CASE("BoundedString ConcatenationOperators" , "[BEH]") {
+TEST_CASE("BoundedString ConcatenationOperators", "[BEH]") {
   OneOne a(RandomString(1));
   std::string a_before_throw = a.string();
   OneTwo b(RandomString(1));
